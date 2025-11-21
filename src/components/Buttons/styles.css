@@ -1,0 +1,45 @@
+.btn {
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  font-size: 0.875rem;
+}
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Mantemos o verde neon pois o texto é preto, contraste ok */
+.btn-primary {
+  background-color: #d8f56a;
+  color: black;
+  padding: 0.5rem 1rem;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+/* Ghost agora adaptado para fundo branco */
+.btn-ghost {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+}
+.btn-ghost:hover {
+  border-color: #333;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+.btn-icon {
+  padding: 0.4rem;
+  font-size: 1rem;
+}
