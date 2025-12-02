@@ -3,7 +3,7 @@ import "./styles.css";
 
 const menuItems = [
   { label: "Recente", icon: "⏰", className: "icon-recent", href: "/" },
-  { label: "Usuários", icon: "👥", className: "icon-users", href: "/" },
+  { label: "Usuários", icon: "👥", className: "icon-users", href: "/User" },
   { label: "Clientes", icon: "😊", className: "icon-customers", href: "/" },
   {
     label: "Maquinas",
