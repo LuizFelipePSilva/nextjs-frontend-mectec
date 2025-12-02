@@ -1,0 +1,97 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-content {
+  flex: 1;
+  padding: 3rem 2rem;
+  overflow-y: auto;
+}
+
+/* Título preto para contraste */
+.page-title {
+  color: #111;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.controls-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  margin-top: 1rem;
+}
+
+.controls-bar div:first-of-type {
+  flex: 1;
+}
+
+.controls-bar div:nth-of-type(2) {
+  width: 150px;
+}
+
+/* Tabela Clean */
+.user-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+}
+
+.user-table tr :last-child {
+  text-align: right;
+}
+
+/* Linhas com borda sutil e fundo branco */
+.table-row td {
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  transition: 0.2s;
+  color: #333;
+}
+
+.table-row:hover td {
+  background: #f9f9f9;
+}
+
+.table-head-cell {
+  padding: 1rem;
+  color: #666; /* Texto cinza escuro */
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  border-bottom: 2px solid #eee;
+}
+
+.table-cell {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.table-row .table-cell:last-of-type div {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.load-message {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  font-weight: bold;
+  font-size: larger;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
