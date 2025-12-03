@@ -19,14 +19,11 @@ export default function LoginPage() {
       <div className="login-content">
         <h1 className="login-title">Login</h1>
         <form action={loginFormAction} className="login-form">
+          {loginState.errors && (
+            <span className="login-error">{loginState.errors}</span>
+          )}
           <Input label="username" name="username" />
-          {loginState.username && (
-            <span className="login-error">{loginState.username}</span>
-          )}
-          <Input label="senha" type="password" name="" />
-          {loginState.password && (
-            <span className="login-error">{loginState.password}</span>
-          )}
+          <Input label="senha" type="password" name="password" />
           <Button disabled={loginPending}>Login</Button>
         </form>
       </div>
