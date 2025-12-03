@@ -140,6 +140,25 @@ export default function OrderPage() {
           Tem a certeza que deseja remover o pedido <b>#{selectedId}</b>?
         </p>
       </Modal>
+      <Modal
+        isOpen={modalType === "aprovar"}
+        onClose={close}
+        title="Aprovar"
+        footer={
+          <>
+            <Button variant="ghost" onClick={close}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={close}>
+              Aprovar
+            </Button>
+          </>
+        }
+      >
+        <p>
+          Tem a certeza que deseja aprovar o pedido <b>#{selectedId}</b>?
+        </p>
+      </Modal>
     </div>
   );
 }
