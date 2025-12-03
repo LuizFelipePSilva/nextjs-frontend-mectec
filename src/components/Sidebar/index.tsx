@@ -13,7 +13,7 @@ const menuItems = [
   },
   { label: "Pedidos", icon: "📦", className: "icon-orders", href: "/Order" },
   { label: "Serviços", icon: "🛠️", className: "icon-services", href: "/" },
-  { label: "Peças", icon: "⚙️", className: "icon-engines", href: "/" },
+  { label: "Peças", icon: "⚙️", className: "icon-engines", href: "/Piece" },
 ];
 
 export const Sidebar = () => {
