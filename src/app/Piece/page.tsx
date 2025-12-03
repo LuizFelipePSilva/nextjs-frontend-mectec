@@ -28,15 +28,15 @@ export default function OrderPage() {
   return (
     <div className="page-container">
       <main className="main-content">
-        <h1 className="page-title">Gerenciamento de Pedidos</h1>
+        <h1 className="page-title">Gerenciamento de Peças</h1>
 
         <div className="controls-bar">
           <div style={{ flex: 1 }}>
-            <Input placeholder="Buscar pedidos..." label="Pesquisa" />
+            <Input placeholder="Buscar peças..." label="Pesquisa" />
           </div>
           <div style={{ width: "150px" }}>
             <Button onClick={() => open("criar")} fullWidth>
-              + Novo pedido
+              + Nova peça
             </Button>
           </div>
         </div>
@@ -44,9 +44,10 @@ export default function OrderPage() {
         <table className="order-table">
           <thead>
             <tr>
-              <th className="table-head-cell">N° Pedido</th>
-              <th className="table-head-cell">Máquina</th>
-              <th className="table-head-cell">Cliente</th>
+              <th className="table-head-cell">Nome</th>
+              <th className="table-head-cell">Preço</th>
+              <th className="table-head-cell">Marca</th>
+              <th className="table-head-cell">Descrição</th>
               <th className="table-head-cell" style={{ textAlign: "right" }}>
                 Ações
               </th>
@@ -55,9 +56,10 @@ export default function OrderPage() {
           <tbody>
             {[1, 2, 3].map((i) => (
               <tr key={i} className="table-row">
-                <td className="table-cell">{i}</td>
-                <td className="table-cell">Máquina {i}</td>
-                <td className="table-cell">Cliente {i}</td>
+                <td className="table-cell">Nome {i}</td>
+                <td className="table-cell">Preço {i}</td>
+                <td className="table-cell">Marca {i}</td>
+                <td className="table-cell">Descrição {i}</td>
                 <td className="table-cell">
                   <div
                     style={{
@@ -72,13 +74,6 @@ export default function OrderPage() {
                     <Button variant="icon" onClick={() => open("editar", i)}>
                       ✏️
                     </Button>
-                    <Button
-                      variant="icon"
-                      style={{ color: "#16a34a" }}
-                      onClick={() => open("aprovar", i)}
-                    >
-                      ✅
-                    </Button>
                   </div>
                 </td>
               </tr>
@@ -91,16 +86,17 @@ export default function OrderPage() {
       <Modal
         isOpen={modalType === "criar"}
         onClose={close}
-        title="Criar Novo Pedido"
+        title="Criar Nova Peça"
         footer={
           <Button type="submit" form="form-criar" fullWidth>
-            Criar Pedido
+            Criar Peça
           </Button>
         }
       >
         <form id="form-criar" className="modal-form" onSubmit={handleSubmit}>
-          <Input label="Máquina" placeholder="Ex: Torno CNC" />
-          <Input label="Cliente" placeholder="Nome do cliente" />
+          <Input label="Nome" placeholder="Ex: Parafuso 3/8" />
+          <Input label="Preço" placeholder="Ex: 3" />
+          <Input label="Marca" placeholder="Ex: Borsh" />
           <Input label="Descrição" isTextArea placeholder="Detalhes..." />
         </form>
       </Modal>
@@ -108,7 +104,7 @@ export default function OrderPage() {
       <Modal
         isOpen={modalType === "editar"}
         onClose={close}
-        title={`Editar Pedido #${selectedId}`}
+        title={`Editar Peça #${selectedId}`}
         footer={
           <Button type="submit" form="form-editar" fullWidth>
             Salvar
@@ -116,8 +112,14 @@ export default function OrderPage() {
         }
       >
         <form id="form-editar" className="modal-form" onSubmit={handleSubmit}>
-          <Input label="Máquina" defaultValue="Máquina X" />
-          <Input label="Cliente" defaultValue="Cliente Y" />
+          <Input label="Nome" placeholder={`Nome da peça ${selectedId}`} />
+          <Input label="Preço" placeholder={`Preço da peça ${selectedId}`} />
+          <Input label="Marca" placeholder={`Marca da peça ${selectedId}`} />
+          <Input
+            label="Descrição"
+            isTextArea
+            placeholder={`Descrição da peça ${selectedId}`}
+          />
         </form>
       </Modal>
 
@@ -137,26 +139,7 @@ export default function OrderPage() {
         }
       >
         <p>
-          Tem a certeza que deseja remover o pedido <b>#{selectedId}</b>?
-        </p>
-      </Modal>
-      <Modal
-        isOpen={modalType === "aprovar"}
-        onClose={close}
-        title="Aprovar"
-        footer={
-          <>
-            <Button variant="ghost" onClick={close}>
-              Cancelar
-            </Button>
-            <Button variant="primary" onClick={close}>
-              Aprovar
-            </Button>
-          </>
-        }
-      >
-        <p>
-          Tem a certeza que deseja aprovar o pedido <b>#{selectedId}</b>?
+          Tem a certeza que deseja remover a peça <b>#{selectedId}</b>?
         </p>
       </Modal>
     </div>
