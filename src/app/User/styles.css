@@ -90,8 +90,21 @@
   animation: pulse 1.4s ease-in-out infinite;
 }
 
+.load-message {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  font-weight: bold;
+  font-size: larger;
+}
+
 @keyframes pulse {
   0%   { opacity: 1; }
   50%  { opacity: 0.5; }
   100% { opacity: 1; }
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.8rem;
 }
