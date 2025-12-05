@@ -4,23 +4,53 @@ import "./styles.css";
 
 import { Input } from "@/components/Inputs";
 import { Button } from "@/components/Buttons";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Modal } from "@/components/Modals";
+import { useRouter } from "next/navigation";
+import { createAction, deleteUser, loadData, resetUser } from "./actions";
+import Pagination from "@/components/Pagination";
 
 type User = {
   id: string;
   username: string;
   email: string;
-  cargo: "admin" | "user";
+  role: "ADMIN" | "USER";
 };
 
 type ModalActionType = "delete" | "reset";
 type ModalType = "create" | ModalActionType;
 
 export default function UserPage() {
-  const [users, setUsers] = useState<User[] | null>(null);
+  const router = useRouter();
+  const [users, setUsers] = useState<User[]>();
+
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   const [modalOpen, setModalOpen] = useState<ModalType | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [createState, createFormAction, createPending] = useActionState(
+    createAction,
+    {
+      success: false,
+      username: "",
+      email: "",
+    }
+  );
+
+  const onCLickDelete = async () => {
+    await deleteUser(selectedId!);
+    load();
+    closeModal();
+  };
+
+  const onCLickReset = async () => {
+    await resetUser(selectedId!);
+    load();
+    closeModal();
+  };
 
   const openCreateModal = () => {
     setModalOpen("create");
@@ -40,28 +70,28 @@ export default function UserPage() {
     return users?.find((user) => user.id == id);
   };
 
+  const load = async () => {
+    const data = await loadData(search, page);
+    setUsers(data.content);
+    setTotalPages(data.totalPages);
+  };
+
   useEffect(() => {
-    setUsers([
-      {
-        id: "8d0c2c22-9892-4de8-a2f6-3888b15d5f27",
-        username: "Admin",
-        email: "admin@example.com",
-        cargo: "admin",
-      },
-      {
-        id: "b1bbc2af-bf16-4413-b66b-a37db7df8cb8",
-        username: "User1",
-        email: "user1@example.com",
-        cargo: "user",
-      },
-      {
-        id: "f4862f05-3994-4a72-8b80-0a619d6678dc",
-        username: "User2",
-        email: "user2@example.com",
-        cargo: "user",
-      },
-    ]);
-  }, []);
+    const timeout = setTimeout(() => {
+      console.log(".");
+      load();
+    }, 1000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [search, page]);
+
+  useEffect(() => {
+    if (createState.success) {
+      load();
+      closeModal();
+    }
+  }, [createState]);
 
   return (
     <div className="page-container">
@@ -70,7 +100,14 @@ export default function UserPage() {
 
         <div className="controls-bar">
           <div>
-            <Input placeholder="Buscar usuários..." label="Pesquisa" />
+            <Input
+              placeholder="Buscar usuários..."
+              label="Pesquisa"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+            />
           </div>
           <div>
             <Button onClick={openCreateModal} fullWidth>
@@ -96,17 +133,19 @@ export default function UserPage() {
                   <td className="table-cell">{user.id}</td>
                   <td className="table-cell">{user.username}</td>
                   <td className="table-cell">{user.email}</td>
-                  <td className="table-cell">{user.cargo}</td>
+                  <td className="table-cell">{user.role}</td>
                   <td className="table-cell">
                     <div>
                       <Button
                         variant="icon"
+                        disabled={user.role == "ADMIN"}
                         onClick={() => openActionModal("delete", user.id)}
                       >
                         🗑️
                       </Button>
                       <Button
                         variant="icon"
+                        disabled={user.role == "ADMIN"}
                         onClick={() => openActionModal("reset", user.id)}
                       >
                         🔐
@@ -118,7 +157,11 @@ export default function UserPage() {
             </tbody>
           )}
         </table>
-        {!users && <span className="load-message">Carregando...</span>}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onChange={(next) => setPage(next)}
+        />
       </main>
 
       <Modal
@@ -126,14 +169,33 @@ export default function UserPage() {
         onClose={closeModal}
         title="Criar Novo Usuário"
         footer={
-          <Button type="submit" fullWidth>
+          <Button
+            form="create-form"
+            type="submit"
+            fullWidth
+            disabled={createPending}
+          >
             Criar Usuário
           </Button>
         }
       >
-        <form className="modal-form">
-          <Input label="username" placeholder="Gabriel" />
-          <Input label="email" placeholder="gabriel@example" />
+        <form id="create-form" className="modal-form" action={createFormAction}>
+          {createState.errors && (
+            <span className="form-error">{createState.errors}</span>
+          )}
+          <Input
+            label="username"
+            placeholder="Gabriel"
+            name="username"
+            defaultValue={createState.username}
+          />
+          <Input
+            label="email"
+            type="email"
+            placeholder="gabriel@example"
+            name="email"
+            defaultValue={createState.email}
+          />
         </form>
       </Modal>
 
@@ -146,7 +208,7 @@ export default function UserPage() {
             <Button variant="ghost" onClick={closeModal} fullWidth>
               Cancelar
             </Button>
-            <Button variant="danger" onClick={closeModal} fullWidth>
+            <Button variant="danger" onClick={onCLickDelete} fullWidth>
               Confirmar
             </Button>
           </>
@@ -167,7 +229,7 @@ export default function UserPage() {
             <Button variant="ghost" onClick={closeModal} fullWidth>
               Cancelar
             </Button>
-            <Button variant="danger" onClick={closeModal} fullWidth>
+            <Button variant="danger" onClick={onCLickReset} fullWidth>
               Confirmar
             </Button>
           </>
