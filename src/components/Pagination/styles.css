@@ -1,0 +1,19 @@
+.pagination-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1.25rem;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.pagination-text {
+    color: #111;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.pagination-button {
+    border-width: 0;
+}
