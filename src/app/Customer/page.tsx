@@ -4,8 +4,15 @@ import "./styles.css";
 
 import { Input } from "@/components/Inputs";
 import { Button } from "@/components/Buttons";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Modal } from "@/components/Modals";
+import Pagination from "@/components/Pagination";
+import {
+  createAction,
+  deleteCustomer,
+  loadData,
+  updateAction,
+} from "./actions";
 
 type Customer = {
   id: string;
@@ -19,10 +26,40 @@ type Customer = {
 type ModalActionType = "delete" | "edit";
 type ModalType = "create" | ModalActionType;
 
-export default function customerPage() {
+export default function CustomerPage() {
   const [customers, setCustomers] = useState<Customer[] | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   const [modalOpen, setModalOpen] = useState<ModalType | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [createState, createFormAction, createPending] = useActionState(
+    createAction,
+    {
+      success: false,
+      name: "",
+      cpf: "",
+      phone: "",
+      email: "",
+      address: "",
+    }
+  );
+
+  const [updateState, updateFormAction, updatePending] = useActionState(
+    updateAction,
+    {
+      success: false,
+    }
+  );
+
+  const onCLickDelete = async () => {
+    await deleteCustomer(selectedId!);
+    load();
+    closeModal();
+  };
 
   const openCreateModal = () => {
     setModalOpen("create");
@@ -42,34 +79,35 @@ export default function customerPage() {
     return customers?.find((customer) => customer.id == id);
   };
 
+  const load = async () => {
+    const data = await loadData(search, page);
+    setCustomers(data.content);
+    setTotalPages(data.totalPages);
+  };
+
   useEffect(() => {
-    setCustomers([
-      {
-        id: "8d0c2c22-9892-4de8-a2f6-3888b15d5f27",
-        name: "Jose",
-        cpf: "12345678900",
-        phone: "84912345678",
-        email: "jose@example.com",
-        address: "Rua A",
-      },
-      {
-        id: "b1bbc2af-bf16-4413-b66b-a37db7df8cb8",
-        name: "Maria",
-        cpf: "12345678901",
-        phone: "84912345677",
-        email: "maria@example.com",
-        address: "Rua B",
-      },
-      {
-        id: "f4862f05-3994-4a72-8b80-0a619d6678dc",
-        name: "João",
-        cpf: "12345678902",
-        phone: "84912345676",
-        email: "joao@example.com",
-        address: "Rua C",
-      },
-    ]);
-  }, []);
+    const timeout = setTimeout(() => {
+      console.log(".");
+      load();
+    }, 1000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [search, page]);
+
+  useEffect(() => {
+    if (createState.success) {
+      load();
+      closeModal();
+    }
+  }, [createState]);
+
+  useEffect(() => {
+    if (updateState.success) {
+      load();
+      closeModal();
+    }
+  }, [updateState]);
 
   return (
     <div className="page-container">
@@ -78,7 +116,14 @@ export default function customerPage() {
 
         <div className="controls-bar">
           <div>
-            <Input placeholder="Buscar clientes..." label="Pesquisa" />
+            <Input
+              placeholder="Buscar clientes..."
+              label="Pesquisa"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+            />
           </div>
           <div>
             <Button onClick={openCreateModal} fullWidth>
@@ -130,7 +175,11 @@ export default function customerPage() {
             </tbody>
           )}
         </table>
-        {!customers && <span className="load-message">Carregando...</span>}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onChange={(next) => setPage(next)}
+        />
       </main>
 
       <Modal
@@ -138,17 +187,51 @@ export default function customerPage() {
         onClose={closeModal}
         title="Criar Novo Usuário"
         footer={
-          <Button type="submit" fullWidth>
+          <Button
+            form="create-form"
+            type="submit"
+            fullWidth
+            disabled={createPending}
+          >
             Criar Cliente
           </Button>
         }
       >
-        <form className="modal-form">
-          <Input label="nome" placeholder="Gabriel" />
-          <Input label="cpf" placeholder="" />
-          <Input label="telefone" placeholder="" />
-          <Input label="email" placeholder="gabriel@example.com" />
-          <Input label="endereço" placeholder="" />
+        <form id="create-form" className="modal-form" action={createFormAction}>
+          {createState.errors && (
+            <span className="form-error">{createState.errors}</span>
+          )}
+          <Input
+            label="nome"
+            placeholder="Gabriel"
+            name="name"
+            defaultValue={createState.name}
+          />
+          <Input
+            label="cpf"
+            placeholder=""
+            name="cpf"
+            defaultValue={createState.cpf}
+          />
+          <Input
+            label="telefone"
+            placeholder=""
+            name="phone"
+            defaultValue={createState.phone}
+          />
+          <Input
+            label="email"
+            type="email"
+            placeholder="gabriel@example.com"
+            name="email"
+            defaultValue={createState.email}
+          />
+          <Input
+            label="endereço"
+            placeholder=""
+            name="address"
+            defaultValue={createState.address}
+          />
         </form>
       </Modal>
 
@@ -161,7 +244,7 @@ export default function customerPage() {
             <Button variant="ghost" onClick={closeModal} fullWidth>
               Cancelar
             </Button>
-            <Button variant="danger" onClick={closeModal} fullWidth>
+            <Button variant="danger" onClick={onCLickDelete} fullWidth>
               Confirmar
             </Button>
           </>
@@ -178,31 +261,45 @@ export default function customerPage() {
         onClose={closeModal}
         title="Editar Cliente"
         footer={
-          <Button type="submit" fullWidth>
-            Criar Cliente
+          <Button
+            form="update-form"
+            type="submit"
+            fullWidth
+            disabled={updatePending}
+          >
+            Editar Cliente
           </Button>
         }
       >
-        <form className="modal-form">
+        <form id="update-form" className="modal-form" action={updateFormAction}>
+          <input type="hidden" defaultValue={selectedId!} name="id" />
+          {updateState.errors && (
+            <span className="form-error">{updateState.errors}..</span>
+          )}
           <Input
             label="nome"
             placeholder="Gabriel"
             defaultValue={(selectedId && findCustomer(selectedId)?.name) || ""}
+            name="name"
           />
           <Input
             label="cpf"
             placeholder=""
             defaultValue={(selectedId && findCustomer(selectedId)?.cpf) || ""}
+            name="cpf"
           />
           <Input
             label="telefone"
             placeholder=""
             defaultValue={(selectedId && findCustomer(selectedId)?.phone) || ""}
+            name="phone"
           />
           <Input
             label="email"
+            type="email"
             placeholder="gabriel@example.com"
             defaultValue={(selectedId && findCustomer(selectedId)?.email) || ""}
+            name="email"
           />
           <Input
             label="endereço"
@@ -210,6 +307,7 @@ export default function customerPage() {
             defaultValue={
               (selectedId && findCustomer(selectedId)?.address) || ""
             }
+            name="address"
           />
         </form>
       </Modal>
