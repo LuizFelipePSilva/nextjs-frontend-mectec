@@ -95,3 +95,8 @@
   50%  { opacity: 0.5; }
   100% { opacity: 1; }
 }
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
