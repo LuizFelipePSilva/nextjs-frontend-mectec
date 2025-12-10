@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import "./styles.css";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Button } from "../Buttons";
 import { Modal } from "../Modals";
 import { changePasswordAction, loadUserData, logout } from "./actions";
 import { Input } from "../Inputs";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {
@@ -62,7 +62,6 @@ const menuItems = [
 ];
 
 export const Sidebar = () => {
-  const router = useRouter();
   const pathname = usePathname();
 
   const [openDropdown, setOpenDropdown] = useState(false);

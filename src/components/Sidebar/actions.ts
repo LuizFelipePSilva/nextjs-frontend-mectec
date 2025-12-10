@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const adminPaths = ["/User"];
@@ -8,8 +8,6 @@ const adminPaths = ["/User"];
 export const loadUserData = async (path: string) => {
   const cookiesStore = await cookies();
   const token = cookiesStore.get("token")?.value;
-
-  const headersStore = await headers();
 
   if (!token) {
     redirect("/Login");
