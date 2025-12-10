@@ -18,7 +18,6 @@ import {
     type CustomerOption,
 } from "./actions";
 
-// Opções fixas do Enum do Backend
 const CATEGORY_OPTIONS = [
     { id: "POWER_TOOL", label: "Ferramenta Elétrica" },
     { id: "HOME_APPLIANCE", label: "Eletrodoméstico" },
@@ -27,22 +26,20 @@ const CATEGORY_OPTIONS = [
 ];
 
 export default function MachinePage() {
-    // Estados de Controle de Tela
+    
     const [items, setItems] = useState<Machine[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState("");
 
-    // Estados dos Modais Principais
     const [modal, setModal] = useState<"criar" | "editar" | "deletar" | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    // Estados dos Modais de Seleção (Aninhados)
+    const [errorMessage, setErrorMessage] = useState("");
     const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
     const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
     const [customersList, setCustomersList] = useState<CustomerOption[]>([]);
 
-    // Estado do Formulário
     const [formData, setFormData] = useState({
         model: "",
         brand: "",
@@ -69,6 +66,7 @@ export default function MachinePage() {
     const close = () => {
         setModal(null);
         setSelectedId(null);
+        setErrorMessage("");
         setFormData({
             model: "",
             brand: "",
@@ -81,6 +79,7 @@ export default function MachinePage() {
 
     const open = (type: "criar" | "editar" | "deletar", machine?: Machine) => {
         setModal(type);
+        setErrorMessage("");
         if (machine) {
             setSelectedId(machine.id);
             if (type === "editar") {
@@ -95,9 +94,32 @@ export default function MachinePage() {
             }
         }
     };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage(""); 
+
+        if (!formData.model.trim()) {
+            setErrorMessage("O modelo é obrigatório.");
+            return;
+        }
+        if (!formData.brand.trim()) {
+            setErrorMessage("A marca é obrigatória.");
+            return;
+        }
+        if (!formData.category) {
+            setErrorMessage("Selecione uma categoria.");
+            return;
+        }
+        if (!formData.customerId) {
+            setErrorMessage("Selecione um cliente.");
+            return;
+        }
+
+        if (!formData.description || formData.description.length < 10) {
+            setErrorMessage("A descrição deve ter pelo menos 10 caracteres.");
+            return;
+        }
+
         const fd = new FormData();
         fd.set("model", formData.model);
         fd.set("brand", formData.brand);
@@ -105,14 +127,20 @@ export default function MachinePage() {
         fd.set("description", formData.description);
         fd.set("customerID", formData.customerId);
 
+        let result;
+
         if (modal === "criar") {
-            await createMachineAction(fd);
+            result = await createMachineAction(fd);
         } else if (modal === "editar" && selectedId) {
-            await updateMachineAction(selectedId, fd);
+            result = await updateMachineAction(selectedId, fd);
         }
 
-        close();
-        refreshData();
+        if (result && !result.success) {
+            setErrorMessage(result.message || "Erro ao salvar máquina.");
+        } else {
+            close();
+            refreshData();
+        }
     };
 
     const handleDelete = async () => {
@@ -166,7 +194,6 @@ export default function MachinePage() {
                             <th className="table-head-cell">Marca</th>
                             <th className="table-head-cell">Categoria</th>
                             <th className="table-head-cell">Cliente</th>
-                            {/* Adicionado Header Descrição */}
                             <th className="table-head-cell">Descrição</th>
                             <th className="table-head-cell" style={{ textAlign: "right" }}>Ações</th>
                         </tr>
@@ -183,7 +210,6 @@ export default function MachinePage() {
                                     <td className="table-cell">{item.brand}</td>
                                     <td className="table-cell">{getCategoryLabel(item.category)}</td>
                                     <td className="table-cell">{item.customer.name}</td>
-                                    {/* Adicionado Célula Descrição */}
                                     <td className="table-cell">{item.description}</td>
                                     <td className="table-cell" style={{ textAlign: "right" }}>
                                         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
@@ -196,7 +222,6 @@ export default function MachinePage() {
                     </tbody>
                 </table>
 
-                {/* Adicionei a Paginação que também estava faltando para completar igual ao modulo Piece */}
                 <div className="pagination">
                     <Button disabled={page === 0} onClick={() => setPage(page - 1)}>Prev</Button>
                     <span>{page + 1} / {totalPages > 0 ? totalPages : 1}</span>
@@ -205,7 +230,6 @@ export default function MachinePage() {
 
             </main>
 
-            {/* --- MODAL PRINCIPAL --- */}
             <Modal
                 isOpen={modal === "criar" || modal === "editar"}
                 onClose={close}
@@ -217,6 +241,20 @@ export default function MachinePage() {
                 }
             >
                 <form className="machine-form">
+                    {errorMessage && (
+                        <div style={{
+                            color: "#ef4444",
+                            fontSize: "0.85rem",
+                            padding: "0.75rem",
+                            border: "1px solid #fecaca",
+                            borderRadius: "4px",
+                            backgroundColor: "#fef2f2",
+                            marginBottom: "0.5rem"
+                        }}>
+                            ⚠️ {errorMessage}
+                        </div>
+                    )}
+
                     <Input
                         label="Modelo"
                         value={formData.model}
@@ -259,7 +297,7 @@ export default function MachinePage() {
                     </div>
 
                     <Input
-                        label="Descrição"
+                        label="Descrição (Mínimo 10 caracteres)" 
                         isTextArea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -267,7 +305,6 @@ export default function MachinePage() {
                 </form>
             </Modal>
 
-            {/* --- MODAL DELETAR --- */}
             <Modal
                 isOpen={modal === "deletar"}
                 onClose={close}
@@ -282,7 +319,6 @@ export default function MachinePage() {
                 <p>Tem certeza que deseja remover esta máquina?</p>
             </Modal>
 
-            {/* --- MODAIS ANINHADOS --- */}
             <SelectionModal
                 isOpen={isCustomerModalOpen}
                 onClose={() => setCustomerModalOpen(false)}
