@@ -1,124 +1,111 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useCallback } from "react";
 import "./styles.css";
 
 import { Button } from "@/components/Buttons";
 import { Input } from "@/components/Inputs";
 import { Modal } from "@/components/Modals";
 
-export type Piece = {
-  id: number;
-  name: string;
-  price: number;
-  brand: string;
-  description: string;
-};
+import {
+  loadPiecesData,
+  getPieceDetails,
+  createPieceAction,
+  updatePieceAction,
+  deletePieceAction,
+  type Piece,
+} from "./actions";
 
-export type PiecesResponse = {
-  content: Piece[];
-  totalPages: number;
-  totalElements: number;
-  number: number;
-  size: number;
-};
-
-export default function OrderPage() {
-  const [modalType, setModalType] = useState<string | null>(null);
+export default function PiecePage() {
+  const [modal, setModal] = useState<"criar" | "editar" | "deletar" | null>(
+    null,
+  );
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  const token =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1Mjk3NzYwLCJleHAiOjE3NjUzMDEzNjB9.GfAbN8WivI_GU3_UOjhj48DEav_vODdE7KR20TaWix0";
-  const [page, setPage] = useState(0);
-  const size = 10;
 
   const [items, setItems] = useState<Piece[]>([]);
   const [totalPages, setTotalPages] = useState(0);
-  const [editData, setEditData] = useState<Piece | null>(null);
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
+
+  const [editing, setEditing] = useState<Piece | null>(null);
+
   const [createData, setCreateData] = useState({
     name: "",
     price: 0,
     brand: "",
     description: "",
   });
-  const [search, setSearch] = useState("");
 
-  const reload = () => {
-    fetch(`http://localhost:8080/api/v1/pieces?page=${page}&size=${size}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then((d: PiecesResponse) => {
-        setItems(d.content);
-        setTotalPages(d.totalPages);
-      });
-  };
-
-  useEffect(reload, [page, token]);
-
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editData) return;
-
-    await fetch(`http://localhost:8080/api/v1/pieces/${editData.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(editData),
-    });
-
-    close();
-    reload();
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    await fetch("http://localhost:8080/api/v1/pieces", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(createData),
-    });
-    close();
-    reload();
-  };
-
-  const handleDelete = async () => {
-    if (!selectedId) return;
-
-    await fetch(`http://localhost:8080/api/v1/pieces/${selectedId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    close();
-    reload();
-  };
-
-  const open = (type: string, id: number | null = null) => {
-    setModalType(type);
-    setSelectedId(id);
-
-    if (type === "editar" && id) {
-      const item = items.find((x) => x.id === id);
-      if (item) setEditData(item);
-    }
-  };
-
-  const close = () => {
-    setModalType(null);
+  const close = useCallback(() => {
+    setModal(null);
     setSelectedId(null);
-    setEditData(null);
+    setEditing(null);
     setCreateData({
       name: "",
       price: 0,
       brand: "",
       description: "",
     });
+  }, []);
+
+  const open = useCallback(
+    async (type: "criar" | "editar" | "deletar", id: number | null = null) => {
+      setModal(type);
+      setSelectedId(id);
+
+      if (type === "editar" && id) {
+        const data = await getPieceDetails(id);
+        if (data) setEditing(data);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const data = await loadPiecesData(page, 10);
+      if (!mounted) return;
+      setItems(data.content);
+      setTotalPages(data.totalPages);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [page]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.set("name", createData.name);
+    fd.set("price", String(createData.price));
+    fd.set("brand", createData.brand);
+    fd.set("description", createData.description);
+
+    await createPieceAction(fd);
+    close();
+    const data = await loadPiecesData(page, 10);
+    setItems(data.content);
+    setTotalPages(data.totalPages);
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    await updatePieceAction(editing.id, editing);
+    close();
+    const data = await loadPiecesData(page, 10);
+    setItems(data.content);
+    setTotalPages(data.totalPages);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedId) return;
+    await deletePieceAction(selectedId);
+    close();
+    const data = await loadPiecesData(page, 10);
+    setItems(data.content);
+    setTotalPages(data.totalPages);
   };
 
   return (
@@ -169,7 +156,7 @@ export default function OrderPage() {
                   <td className="table-cell">{item.price}</td>
                   <td className="table-cell">{item.brand}</td>
                   <td className="table-cell">{item.description}</td>
-                  <td className="table-cell">
+                  <td className="table-cell" style={{ textAlign: "right" }}>
                     <div
                       style={{
                         display: "flex",
@@ -200,11 +187,9 @@ export default function OrderPage() {
           <Button disabled={page === 0} onClick={() => setPage(page - 1)}>
             Prev
           </Button>
-
           <span>
             {page + 1} / {totalPages}
           </span>
-
           <Button
             disabled={page + 1 >= totalPages}
             onClick={() => setPage(page + 1)}
@@ -215,12 +200,12 @@ export default function OrderPage() {
       </main>
 
       <Modal
-        isOpen={modalType === "criar"}
+        isOpen={modal === "criar"}
         onClose={close}
         title="Criar Nova Peça"
         footer={
           <Button type="submit" form="form-criar" fullWidth>
-            Criar Peça
+            Criar
           </Button>
         }
       >
@@ -232,6 +217,7 @@ export default function OrderPage() {
               setCreateData({ ...createData, name: e.target.value })
             }
           />
+
           <Input
             label="Preço"
             value={createData.price}
@@ -239,6 +225,7 @@ export default function OrderPage() {
               setCreateData({ ...createData, price: Number(e.target.value) })
             }
           />
+
           <Input
             label="Marca"
             value={createData.brand}
@@ -246,6 +233,7 @@ export default function OrderPage() {
               setCreateData({ ...createData, brand: e.target.value })
             }
           />
+
           <Input
             label="Descrição"
             isTextArea
@@ -258,7 +246,7 @@ export default function OrderPage() {
       </Modal>
 
       <Modal
-        isOpen={modalType === "editar"}
+        isOpen={modal === "editar"}
         onClose={close}
         title={`Editar Peça #${selectedId}`}
         footer={
@@ -270,38 +258,37 @@ export default function OrderPage() {
         <form id="form-editar" onSubmit={handleEdit}>
           <Input
             label="Nome"
-            value={editData?.name || ""}
-            onChange={(e) =>
-              setEditData({ ...editData!, name: e.target.value })
-            }
+            value={editing?.name || ""}
+            onChange={(e) => setEditing({ ...editing!, name: e.target.value })}
           />
+
           <Input
             label="Preço"
-            value={editData?.price || ""}
+            value={editing?.price || ""}
             onChange={(e) =>
-              setEditData({ ...editData!, price: Number(e.target.value) })
+              setEditing({ ...editing!, price: Number(e.target.value) })
             }
           />
+
           <Input
             label="Marca"
-            value={editData?.brand || ""}
-            onChange={(e) =>
-              setEditData({ ...editData!, brand: e.target.value })
-            }
+            value={editing?.brand || ""}
+            onChange={(e) => setEditing({ ...editing!, brand: e.target.value })}
           />
+
           <Input
             label="Descrição"
             isTextArea
-            value={editData?.description || ""}
+            value={editing?.description || ""}
             onChange={(e) =>
-              setEditData({ ...editData!, description: e.target.value })
+              setEditing({ ...editing!, description: e.target.value })
             }
           />
         </form>
       </Modal>
 
       <Modal
-        isOpen={modalType === "deletar"}
+        isOpen={modal === "deletar"}
         onClose={close}
         title="Excluir"
         footer={
