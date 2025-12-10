@@ -35,7 +35,7 @@ const menuItems = [
     label: "Maquinas",
     icon: "🧰",
     className: "icon-machines",
-    href: "/",
+    href: "/Machine",
     admin: false,
   },
   {
@@ -49,7 +49,7 @@ const menuItems = [
     label: "Serviços",
     icon: "🛠️",
     className: "icon-services",
-    href: "/",
+    href: "/Task",
     admin: false,
   },
   {
