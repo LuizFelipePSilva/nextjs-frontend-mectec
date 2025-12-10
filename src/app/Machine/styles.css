@@ -1,0 +1,111 @@
+.page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main-content {
+    flex: 1;
+    padding: 3rem 2rem;
+    overflow-y: auto;
+}
+
+.page-title {
+    color: #111;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.controls-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+}
+
+.machine-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* --- Tabela --- */
+.order-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+}
+
+.table-row td {
+    border-bottom: 1px solid #eee;
+    background: #fff;
+    color: #333;
+    transition: 0.2s;
+}
+
+.table-row:hover td {
+    background: #f9f9f9;
+}
+
+.table-head-cell {
+    padding: 1rem;
+    color: #666;
+    text-align: left;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 2px solid #eee;
+}
+
+.table-cell {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* --- Estilo dos Containers de Seleção (Imitando o Input) --- */
+.selection-container {
+    width: 100%;
+    padding: 0.6rem;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.selection-container:hover {
+    border-color: #999;
+}
+
+.text-muted {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* --- Chips --- */
+.chip {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    display: inline-block;
+}
+
+.chip-categoria {
+    background-color: #7c3aed;
+    /* Roxo */
+}
+
+.chip-cliente {
+    background-color: #0284c7;
+    /* Azul */
+}
