@@ -5,7 +5,7 @@ import "./styles.css";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "../Buttons";
 import { Modal } from "../Modals";
-import { changePasswordAction, logout } from "./actions";
+import { changePasswordAction, loadUserData, logout } from "./actions";
 import { Input } from "../Inputs";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -90,27 +90,12 @@ export const Sidebar = () => {
   }, [changePasswordState]);
 
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((r) => r.startsWith("token="))
-      ?.split("=")[1];
-
-    if (!token) {
-      router.push("/Login");
-      return;
-    }
-
-    const data = JSON.parse(decodeURIComponent(atob(token!.split(".")[1])));
-
-    setIsAdmin(data.roles[0] == "ROLE_ADMIN");
-    setUsername(data.sub);
-
-    if (!isAdmin) {
-      const path = menuItems.find((r) => r.href == pathname);
-      if (path?.admin == true) {
-        router.push("/");
-      }
-    }
+    const load = async () => {
+      const { admin, username } = await loadUserData(pathname);
+      setIsAdmin(admin);
+      setUsername(username);
+    };
+    load();
   }, [pathname]);
 
   return (
