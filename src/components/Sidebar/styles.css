@@ -98,3 +98,20 @@
 .icon-engines {
   color: #475569;
 } /* Cinza escuro */
+
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  background: #fcfcfc;
+  border: 1px solid #ccc;
+  z-index: 10;
+}
+
+.dropdown button {
+  border: 0px;
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
