@@ -3,6 +3,31 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const adminPaths = ["/User"];
+
+export const loadUserData = async (path: string) => {
+  const cookiesStore = await cookies();
+  const token = cookiesStore.get("token")?.value;
+
+  if (!token) {
+    redirect("/Login");
+  }
+
+  const data = JSON.parse(decodeURIComponent(atob(token!.split(".")[1])));
+
+  const admin = data.roles[0] == "ROLE_ADMIN";
+  const username = data.sub as string;
+
+  if (!admin && adminPaths.includes(path)) {
+    redirect("/");
+  }
+
+  return {
+    admin,
+    username,
+  };
+};
+
 type changePasswordState = {
   success: boolean;
   errors?: string;
