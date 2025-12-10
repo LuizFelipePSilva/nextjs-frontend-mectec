@@ -7,30 +7,68 @@ import { Button } from "../Buttons";
 import { Modal } from "../Modals";
 import { changePasswordAction, logout } from "./actions";
 import { Input } from "../Inputs";
+import { usePathname, useRouter } from "next/navigation";
 
 const menuItems = [
-  { label: "Recente", icon: "⏰", className: "icon-recent", href: "/" },
-  { label: "Usuários", icon: "👥", className: "icon-users", href: "/User" },
+  {
+    label: "Recente",
+    icon: "⏰",
+    className: "icon-recent",
+    href: "/",
+    admin: false,
+  },
+  {
+    label: "Usuários",
+    icon: "👥",
+    className: "icon-users",
+    href: "/User",
+    admin: true,
+  },
   {
     label: "Clientes",
     icon: "😊",
     className: "icon-customers",
     href: "/Customer",
+    admin: false,
   },
   {
     label: "Maquinas",
     icon: "🧰",
     className: "icon-machines",
     href: "/",
+    admin: false,
   },
-  { label: "Pedidos", icon: "📦", className: "icon-orders", href: "/Order" },
-  { label: "Serviços", icon: "🛠️", className: "icon-services", href: "/" },
-  { label: "Peças", icon: "⚙️", className: "icon-engines", href: "/Piece" },
+  {
+    label: "Pedidos",
+    icon: "📦",
+    className: "icon-orders",
+    href: "/Order",
+    admin: false,
+  },
+  {
+    label: "Serviços",
+    icon: "🛠️",
+    className: "icon-services",
+    href: "/",
+    admin: false,
+  },
+  {
+    label: "Peças",
+    icon: "⚙️",
+    className: "icon-engines",
+    href: "/Piece",
+    admin: false,
+  },
 ];
 
 export const Sidebar = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [openDropdown, setOpenDropdown] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [username, setUsername] = useState("");
 
   const [changePasswordState, changePasswordFormAction, changePasswordPending] =
     useActionState(changePasswordAction, {
@@ -51,6 +89,30 @@ export const Sidebar = () => {
     }
   }, [changePasswordState]);
 
+  useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((r) => r.startsWith("token="))
+      ?.split("=")[1];
+
+    if (!token) {
+      router.push("/Login");
+      return;
+    }
+
+    const data = JSON.parse(decodeURIComponent(atob(token!.split(".")[1])));
+
+    setIsAdmin(data.roles[0] == "ROLE_ADMIN");
+    setUsername(data.sub);
+
+    if (!isAdmin) {
+      const path = menuItems.find((r) => r.href == pathname);
+      if (path?.admin == true) {
+        router.push("/");
+      }
+    }
+  }, [pathname]);
+
   return (
     <>
       <aside className="sidebar">
@@ -60,7 +122,7 @@ export const Sidebar = () => {
         >
           <div className="user-profile">
             <span className="avatar-icon">👤</span>
-            <span className="user-info">Usuário</span>
+            <span className="user-info">{username}</span>
             <span className="arrow-icon">▼</span>
           </div>
           {openDropdown && (
@@ -78,12 +140,14 @@ export const Sidebar = () => {
           <ul className="nav-list">
             {menuItems.map((item, index) => (
               <li key={index}>
-                <Link href={item.href} className="nav-item">
-                  <span className={`nav-icon ${item.className}`}>
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </Link>
+                {(item.admin == false || isAdmin) && (
+                  <Link href={item.href} className="nav-item">
+                    <span className={`nav-icon ${item.className}`}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
