@@ -3,9 +3,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// Tipos baseados nos seus DTOs Java
 export type Machine = {
-    id: string; // UUID
+    id: string; 
     model: string;
     brand: string;
     category: "POWER_TOOL" | "HOME_APPLIANCE" | "SMALL_APPLIANCE" | "BEAUTY_SALON";
@@ -13,11 +12,9 @@ export type Machine = {
     customer: {
         id: string;
         name: string;
-        // outros campos do customer se necessário
     };
 };
 
-// Tipo simplificado para o Select de Clientes
 export type CustomerOption = {
     id: string;
     name: string;
@@ -27,6 +24,11 @@ type PageData<T> = {
     content: T[];
     totalPages: number;
     totalElements: number;
+};
+
+type ActionResult = {
+    success: boolean;
+    message?: string;
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/v1";
@@ -55,19 +57,14 @@ export const loadMachinesData = async (page: number, size: number) => {
     return { content: data.content, totalPages: data.totalPages };
 };
 
-// Busca todos os clientes para preencher o Modal (limitado a 100 para exemplo)
 export const loadCustomersForSelect = async (): Promise<CustomerOption[]> => {
     const headers = await getAuthHeaders();
-    // Buscando tamanho 100 para garantir que pegamos bastante gente para a lista
     const res = await fetch(`${API_URL}/customers?page=0&size=100`, { headers });
     if (!res.ok) return [];
     const data = await res.json();
-
-    // Mapeia apenas o que o modal precisa
     return data.content.map((c: any) => ({ id: c.id, name: c.name }));
 };
-
-export const createMachineAction = async (formData: FormData) => {
+export const createMachineAction = async (formData: FormData): Promise<ActionResult> => {
     const headers = await getAuthHeaders();
 
     const body = {
@@ -75,7 +72,7 @@ export const createMachineAction = async (formData: FormData) => {
         brand: formData.get("brand")?.toString(),
         category: formData.get("category")?.toString(),
         description: formData.get("description")?.toString(),
-        customerID: formData.get("customerID")?.toString(), // UUID
+        customerID: formData.get("customerID")?.toString(),
     };
 
     const res = await fetch(`${API_URL}/machines`, {
@@ -85,13 +82,17 @@ export const createMachineAction = async (formData: FormData) => {
     });
 
     if (!res.ok) {
-        const err = await res.json();
-        console.error("Erro ao criar:", err);
-        // Aqui você poderia retornar o erro para mostrar na tela
+        const errorData = await res.json().catch(() => ({}));
+        return {
+            success: false,
+            message: errorData.message || "Erro ao criar máquina. Verifique os dados."
+        };
     }
+
+    return { success: true };
 };
 
-export const updateMachineAction = async (id: string, formData: FormData) => {
+export const updateMachineAction = async (id: string, formData: FormData): Promise<ActionResult> => {
     const headers = await getAuthHeaders();
 
     const body = {
@@ -103,11 +104,21 @@ export const updateMachineAction = async (id: string, formData: FormData) => {
         customerID: formData.get("customerID")?.toString(),
     };
 
-    await fetch(`${API_URL}/machines/${id}`, {
+    const res = await fetch(`${API_URL}/machines/${id}`, {
         method: "PUT",
         headers,
         body: JSON.stringify(body),
     });
+
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        return {
+            success: false,
+            message: errorData.message || "Erro ao atualizar máquina."
+        };
+    }
+
+    return { success: true };
 };
 
 export const deleteMachineAction = async (id: string) => {
