@@ -3,6 +3,49 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/v1/customers";
+
+type JsonMessage = {
+  message: string;
+  validationErrors?: {
+    name?: string;
+    cpf?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+};
+
+const errorMessage = (json: JsonMessage) => {
+  if (json.validationErrors?.name) {
+    return "O nome é obrigatório";
+  }
+
+  if (json.validationErrors?.cpf) {
+    return "O cpf deve ter exatamente 11 dígitos";
+  }
+
+  if (json.validationErrors?.phone) {
+    return "O telefone deve ter entre 1 à 20 dígitos";
+  }
+
+  if (json.validationErrors?.email) {
+    return "O email deve ser válido";
+  }
+
+  if (json.validationErrors?.address) {
+    return "O endereço é obrigatório";
+  }
+
+  const message = json.message;
+  const messagePtBr: Record<string, string> = {
+    "A customer with this cpf, phone or email already exists.":
+      "Um cliente com esse cpf, telefone ou email já existe",
+  };
+
+  return messagePtBr[message] || "Error inesperado";
+};
+
 export const loadData = async (search: string | null, page: number) => {
   const cookiesStore = await cookies();
   const token = cookiesStore.get("token")?.value;
@@ -12,9 +55,7 @@ export const loadData = async (search: string | null, page: number) => {
   }
 
   const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL +
-      "/api/v1/customers" +
-      `?searchTerm=${search}&page=${page}&size=5`,
+    API_URL + `?searchTerm=${search}&page=${page}&size=5`,
     {
       method: "GET",
       headers: {
@@ -64,8 +105,6 @@ export const createAction = async (
     address: address.trim(),
   };
 
-  console.log(data);
-
   const cookiesStore = await cookies();
   const token = cookiesStore.get("token")?.value;
 
@@ -73,30 +112,21 @@ export const createAction = async (
     redirect("/Login");
   }
 
-  const response = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/customers",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-  const res = await response.json();
+  const json = await response.json();
 
   if (response.status != 201) {
-    const message = res.message;
-    const messagePtBr: Record<string, string> = {
-      "A customer with this cpf, phone or email already exists.":
-        "Um cliente com esse cpf, telefone ou email já existe",
-    };
-
     return {
       success: false,
-      errors: messagePtBr[message] || "Aconteceu um error inesperado",
+      errors: errorMessage(json),
       name,
       cpf,
       phone,
@@ -171,32 +201,21 @@ export const updateAction = async (
     redirect("/Login");
   }
 
-  const response = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/customers",
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(API_URL, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-  const res = await response.json();
+  const json = await response.json();
 
   if (response.status != 200) {
-    const message = res.message;
-    const messagePtBr: Record<string, string> = {
-      "A user with this username already exists.":
-        "Já existe um usuário com esse username",
-      "A user with this email already exists.":
-        "Já existe um usuário com esse email",
-    };
-
     return {
       success: false,
-      errors: messagePtBr[message] || message,
+      errors: errorMessage(json),
     };
   }
 
