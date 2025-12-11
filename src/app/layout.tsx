@@ -1,5 +1,4 @@
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar"; // Importe a Sidebar
 
 export const metadata = {
   title: "Meu App",
@@ -14,10 +13,7 @@ export default function RootLayout({
   return (
     <html lang="pt">
       <body>
-        <div style={{ display: "flex", minHeight: "100vh" }}>
-          <Sidebar />
-          <div style={{ flex: 1, backgroundColor: "#f9f9f9" }}>{children}</div>
-        </div>
+        <div style={{ display: "flex", minHeight: "100vh" }}>{children}</div>
       </body>
     </html>
   );
