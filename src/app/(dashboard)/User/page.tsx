@@ -6,7 +6,6 @@ import { Input } from "@/components/Inputs";
 import { Button } from "@/components/Buttons";
 import { useActionState, useEffect, useState } from "react";
 import { Modal } from "@/components/Modals";
-import { useRouter } from "next/navigation";
 import { createAction, deleteUser, loadData, resetUser } from "./actions";
 import Pagination from "@/components/Pagination";
 
@@ -21,7 +20,6 @@ type ModalActionType = "delete" | "reset";
 type ModalType = "create" | ModalActionType;
 
 export default function UserPage() {
-  const router = useRouter();
   const [users, setUsers] = useState<User[]>();
 
   const [search, setSearch] = useState("");
@@ -181,7 +179,7 @@ export default function UserPage() {
       >
         <form id="create-form" className="modal-form" action={createFormAction}>
           {createState.errors && (
-            <span className="form-error">{createState.errors}</span>
+            <div className="form-error">⚠️ {createState.errors}</div>
           )}
           <Input
             label="username"
