@@ -3,6 +3,36 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/v1/users";
+
+type JsonMessage = {
+  message: string;
+  validationErrors?: {
+    username: string;
+    email: string;
+  };
+};
+
+const errorMessage = (json: JsonMessage) => {
+  if (json.validationErrors?.username) {
+    return "O username deve ter entre 5 e 20 caracteres";
+  }
+
+  if (json.validationErrors?.email) {
+    return "O email deve ser válido";
+  }
+
+  const message = json.message;
+  const messagePtBr: Record<string, string> = {
+    "A user with this username already exists.":
+      "Já existe um usuário com esse username",
+    "A user with this email already exists.":
+      "Já existe um usuário com esse email",
+  };
+
+  return messagePtBr[message] || "Error inesperado";
+};
+
 export const loadData = async (search: string | null, page: number) => {
   const cookiesStore = await cookies();
   const token = cookiesStore.get("token")?.value;
@@ -12,9 +42,7 @@ export const loadData = async (search: string | null, page: number) => {
   }
 
   const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL +
-      "/api/v1/users" +
-      `?searchTerm=${search}&page=${page}&size=5`,
+    API_URL + `?searchTerm=${search}&page=${page}&size=5`,
     {
       method: "GET",
       headers: {
@@ -62,32 +90,21 @@ export const createAction = async (
     redirect("/Login");
   }
 
-  const response = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/users",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-  const res = await response.json();
+  const json = await response.json();
 
   if (response.status != 201) {
-    const message = res.message;
-    const messagePtBr: Record<string, string> = {
-      "A user with this username already exists.":
-        "Já existe um usuário com esse username",
-      "A user with this email already exists.":
-        "Já existe um usuário com esse email",
-    };
-
     return {
       success: false,
-      errors: messagePtBr[message] || "Aconteceu um error inesperado",
+      errors: errorMessage(json),
       username,
       email,
     };
@@ -108,16 +125,13 @@ export const deleteUser = async (id: string) => {
     redirect("/Login");
   }
 
-  const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/users/" + id,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const res = await fetch(API_URL + "/" + id, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
 
   if (res.status == 401) {
     redirect("/Login");
@@ -132,16 +146,13 @@ export const resetUser = async (id: string) => {
     redirect("/Login");
   }
 
-  const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/users/" + id,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const res = await fetch(API_URL + "/" + id, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
 
   if (res.status == 401) {
     redirect("/Login");
