@@ -22,10 +22,6 @@ const errorMessage = (json: JsonMessage) => {
     return "O email deve ser válido";
   }
 
-  if (json.validationErrors?.email) {
-    return "O email deve ser válido";
-  }
-
   const message = json.message;
   const messagePtBr: Record<string, string> = {
     "A user with this username already exists.":
