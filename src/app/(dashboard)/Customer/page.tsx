@@ -199,7 +199,7 @@ export default function CustomerPage() {
       >
         <form id="create-form" className="modal-form" action={createFormAction}>
           {createState.errors && (
-            <span className="form-error">{createState.errors}</span>
+            <div className="form-error">⚠️ {createState.errors}</div>
           )}
           <Input
             label="nome"
@@ -274,7 +274,7 @@ export default function CustomerPage() {
         <form id="update-form" className="modal-form" action={updateFormAction}>
           <input type="hidden" defaultValue={selectedId!} name="id" />
           {updateState.errors && (
-            <span className="form-error">{updateState.errors}..</span>
+            <span className="form-error">⚠️ {updateState.errors}..</span>
           )}
           <Input
             label="nome"
