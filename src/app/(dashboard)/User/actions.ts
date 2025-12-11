@@ -125,7 +125,7 @@ export const deleteUser = async (id: string) => {
     redirect("/Login");
   }
 
-  const res = await fetch(API_URL + id, {
+  const res = await fetch(API_URL + "/" + id, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -146,7 +146,7 @@ export const resetUser = async (id: string) => {
     redirect("/Login");
   }
 
-  const res = await fetch(API_URL + id, {
+  const res = await fetch(API_URL + "/" + id, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
