@@ -21,7 +21,7 @@ export default function LoginPage() {
           <h1 className="login-title">Login</h1>
           <form action={loginFormAction} className="login-form">
             {loginState.errors && (
-              <span className="login-error">{loginState.errors}</span>
+              <div className="login-error">⚠️ {loginState.errors}</div>
             )}
             <Input label="username" name="username" />
             <Input label="senha" type="password" name="password" />
