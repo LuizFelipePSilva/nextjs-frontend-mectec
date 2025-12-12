@@ -55,7 +55,7 @@ export const loadData = async (search: string | null, page: number) => {
   }
 
   const res = await fetch(
-    API_URL + `?searchTerm=${search}&page=${page}&size=5`,
+    API_URL + `?searchTerm=${search}&page=${page}&size=10`,
     {
       method: "GET",
       headers: {
@@ -153,16 +153,13 @@ export const deleteCustomer = async (id: string) => {
     redirect("/Login");
   }
 
-  const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/customers/" + id,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const res = await fetch(API_URL + "/" + id, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
 
   if (res.status == 401) {
     redirect("/Login");
