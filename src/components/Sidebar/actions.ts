@@ -5,6 +5,28 @@ import { redirect } from "next/navigation";
 
 const adminPaths = ["/User"];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/v1/users";
+
+type JsonMessage = {
+  message: string;
+  validationErrors?: {
+    newPassword: string;
+  };
+};
+
+const errorMessage = (json: JsonMessage) => {
+  if (json.validationErrors?.newPassword) {
+    return "A nova senha deve ter entre 5 e 20 caracteres";
+  }
+
+  const message = json.message;
+  const messagePtBr: Record<string, string> = {
+    "Old password is incorrect.": "Senha antiga está incorreta",
+  };
+
+  return messagePtBr[message] || "Error inesperado";
+};
+
 export const loadUserData = async (path: string) => {
   const cookiesStore = await cookies();
   const token = cookiesStore.get("token")?.value;
@@ -66,28 +88,21 @@ export const changePasswordAction = async (
     redirect("/Login");
   }
 
-  const response = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/api/v1/users",
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(API_URL, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
   if (response.status != 204) {
-    const res = await response.json();
-    const message = res.message;
-    const messagePtBr: Record<string, string> = {
-      "Old password is incorrect.": "Senha antiga está incorreta",
-    };
+    const json = await response.json();
 
     return {
       success: false,
-      errors: messagePtBr[message] || "Aconteceu um error inesperado",
+      errors: errorMessage(json),
       oldPassword,
       newPassword,
       confirm,
