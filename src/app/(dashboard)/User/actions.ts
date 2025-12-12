@@ -42,7 +42,7 @@ export const loadData = async (search: string | null, page: number) => {
   }
 
   const res = await fetch(
-    API_URL + `?searchTerm=${search}&page=${page}&size=5`,
+    API_URL + `?searchTerm=${search}&page=${page}&size=10`,
     {
       method: "GET",
       headers: {
