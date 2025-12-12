@@ -158,7 +158,7 @@ export const Sidebar = () => {
           action={changePasswordFormAction}
         >
           {changePasswordState.errors && (
-            <span className="form-error">{changePasswordState.errors}</span>
+            <div className="form-error">⚠️ {changePasswordState.errors}</div>
           )}
           <Input
             label="Senha antiga"
