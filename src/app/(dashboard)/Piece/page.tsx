@@ -31,7 +31,7 @@ export default function PiecePage() {
 
   const [createData, setCreateData] = useState({
     name: "",
-    price: 0,
+    price: "",
     brand: "",
     description: "",
   });
@@ -42,7 +42,7 @@ export default function PiecePage() {
     setEditing(null);
     setCreateData({
       name: "",
-      price: 0,
+      price: "",
       brand: "",
       description: "",
     });
@@ -78,7 +78,7 @@ export default function PiecePage() {
     e.preventDefault();
     const fd = new FormData();
     fd.set("name", createData.name);
-    fd.set("price", String(createData.price));
+    fd.set("price", String(Number(createData.price)));
     fd.set("brand", createData.brand);
     fd.set("description", createData.description);
 
@@ -212,6 +212,15 @@ export default function PiecePage() {
         <form id="form-criar" onSubmit={handleCreate}>
           <Input
             label="Nome"
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity("")
+            }
             value={createData.name}
             onChange={(e) =>
               setCreateData({ ...createData, name: e.target.value })
@@ -220,14 +229,34 @@ export default function PiecePage() {
 
           <Input
             label="Preço"
+            type="number"
+            required
+            placeholder="0"
+            onInvalid={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity("")
+            }
             value={createData.price}
             onChange={(e) =>
-              setCreateData({ ...createData, price: Number(e.target.value) })
+              setCreateData({ ...createData, price: e.target.value })
             }
           />
 
           <Input
             label="Marca"
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity("")
+            }
             value={createData.brand}
             onChange={(e) =>
               setCreateData({ ...createData, brand: e.target.value })
@@ -237,6 +266,15 @@ export default function PiecePage() {
           <Input
             label="Descrição"
             isTextArea
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLTextAreaElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLTextAreaElement).setCustomValidity("")
+            }
             value={createData.description}
             onChange={(e) =>
               setCreateData({ ...createData, description: e.target.value })
@@ -258,12 +296,31 @@ export default function PiecePage() {
         <form id="form-editar" onSubmit={handleEdit}>
           <Input
             label="Nome"
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity("")
+            }
             value={editing?.name || ""}
             onChange={(e) => setEditing({ ...editing!, name: e.target.value })}
           />
 
           <Input
             label="Preço"
+            type="number"
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity("")
+            }
             value={editing?.price || ""}
             onChange={(e) =>
               setEditing({ ...editing!, price: Number(e.target.value) })
@@ -272,6 +329,15 @@ export default function PiecePage() {
 
           <Input
             label="Marca"
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLInputElement).setCustomValidity("")
+            }
             value={editing?.brand || ""}
             onChange={(e) => setEditing({ ...editing!, brand: e.target.value })}
           />
@@ -279,6 +345,15 @@ export default function PiecePage() {
           <Input
             label="Descrição"
             isTextArea
+            required
+            onInvalid={(e) =>
+              (e.target as HTMLTextAreaElement).setCustomValidity(
+                "Campo obrigatório",
+              )
+            }
+            onInput={(e) =>
+              (e.target as HTMLTextAreaElement).setCustomValidity("")
+            }
             value={editing?.description || ""}
             onChange={(e) =>
               setEditing({ ...editing!, description: e.target.value })
