@@ -1,0 +1,28 @@
+.content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.title {
+    color: #111;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Cards */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background-color: #f0f0f0;
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #f1f1f1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
