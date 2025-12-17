@@ -1,0 +1,36 @@
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+/* Label agora é escuro para ler no fundo branco */
+.input-label {
+  font-size: 0.8rem;
+  color: #333;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.base-input {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: #ffffff;
+  border: 1px solid #ccc; /* Borda cinza padrão */
+  color: #111;
+  border-radius: 0.25rem;
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+/* Foco mantém a identidade verde */
+.base-input:focus {
+  border-color: #d8f56a;
+  box-shadow: 0 0 0 2px rgba(216, 245, 106, 0.2);
+}
+
+.base-input::placeholder {
+  color: #999;
+}
